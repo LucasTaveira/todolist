@@ -10,7 +10,8 @@ class Task(models.Model):
         verbose_name="Titulo da Tarefa", max_length=50, blank=False, null=False)
     description = models.TextField(
         verbose_name="Descrição", blank=True, null=True)
-    status = models.BooleanField(
+    status = models.CharField(
+        max_length=1,
         verbose_name="Status", choices=STATUS_OPTIONS, default="O",
         help_text="O para Open, C para Closed")
     created_at = models.DateTimeField(auto_now_add=True)
