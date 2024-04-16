@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'rest_framework',
     'drf_yasg',
     
@@ -136,4 +137,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ]
+}
+
+CACHES = {
+    'default': {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        'LOCATION': os.getenv('REDIS_URL'),
+    }
 }
