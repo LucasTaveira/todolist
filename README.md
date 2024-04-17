@@ -34,3 +34,7 @@ git clone https://github.com/LucasTaveira/todolist.git
     python manage.py migrate
     python manage.py runserver
     ```
+
+## Índice 📑
+- [Documentação](#documentação)
+- [Testes](#testes)
