@@ -1,3 +1,26 @@
+## Execução do projeto via docker: 🐳
+Ao executar dessa maneira não precisa se preocupar em executar os outros docker, todos serão iniciados juntos.
+ - utilizar a env nomeada como env-docker, antes de executar o docker execute o comando.
+   ```bash
+   cp .env-docker .env
+   ```
+
+- Para executar o projeto utilizando Docker Compose:
+   ```bash
+   docker-compose up
+   ```
+## Documentação: 📘
+- Após o projeto estar em execução, a documentação dos endpoints pode ser acessada em:
+ ```bash
+ http://127.0.0.1:8000/api/v1/swagger/
+ ```
+
+## Testes: 🧪
+ Para executar os testes, basta executar o comando abaixo:
+ ```bash
+ ./manage.py test task
+ ```
+
 # Execução do projeto sem Docker: 🛠️
 
 ## Instalação e Execução do Projeto: ⚙️
