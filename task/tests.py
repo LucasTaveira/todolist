@@ -1,53 +1,59 @@
-from rest_framework.test import APIClient
-from django.test import TestCase
-from unittest.mock import patch, MagicMock
+from django.test import TestCase, Client
+from model_bakery import baker
 
-from .models import Task
+from task.models import Task
 
-class TaskAPITest(TestCase):
+class TestTask(TestCase):
+    
     def setUp(self):
-        self.client = APIClient()
-        self.task = MagicMock(spec=Task)
-        self.task.id = 1
-        self.task.title = 'Task 1'
-        self.task.description = 'Description 1'
-        self.task.status = 'o'
-        
-    @patch('todolist.task.views.Task.objects.all')    
-    def test_task_list(self, mock_objects_all):
-        mock_objects_all.return_value = [self.task]
-        
-        response = self.client.get('/api/v1/task/')
+        self.client = Client()
+        self.task = baker.make(Task,
+            id=1,
+            title='Task 1',
+            description='Description 1',
+            status='o'
+        )
+        self.url_base = '/api/v1/task/'
+        self.content_type = 'application/json'
+    
+    def test_task_list(self):
+        url = self.url_base
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data[0]['title'], 'Task 1')
         self.assertEqual(response.data[0]['description'], 'Description 1')
-        
-    @patch('todolist.task.views.Task.objects.get')    
-    def test_task_create(self, mock_objects_get):
-        mock_objects_get.return_value = self.task
-        
-        response = self.client.post('/api/v1/task/', 
-            {'title': 'Task 2', 'description': 'Description 2', 'status':'c'}, 
-            format='json'
-        )
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(mock_objects_get.call_count, 1)
-        
-    @patch('todolist.task.views.Task.objects.get')
-    def test_task_update(self, mock_objects_get):
-        mock_objects_get.return_value = self.task
-        
-        response = self.client.put(f'/api/v1/task/{self.task.id}/', 
-            {'title': 'Task 1 Updated', 'description': 'Description 1 Updated'},
-            format='json'
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(mock_objects_get.call_count, 1)
 
-    @patch('todolist.task.views.Task.objects.get')
-    def test_task_delete(self, mock_objects_get):
-        mock_objects_get.return_value = self.task
+    def test_task_create(self):
+        url = self.url_base
+        data = {
+            'title': 'Test Task',
+            'description': 'This is a test task',
+            'status': 'O'
+        }
         
-        self.client.delete(f'/api/v1/task/{self.task.id}/')
-        self.assertEqual(mock_objects_get.call_count, 1)
-        self.assertEqual(mock_objects_get.return_value.delete.call_count, 1)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Task.objects.filter(title='Test Task').exists())
+
+    def test_task_update(self):
+        url_task = self.url_base
+        response_task = self.client.get(url_task)
+        task_to_update = response_task.data[0]['id']
+        
+        url_update = f'{self.url_base}{task_to_update}/'
+        data = {
+            'title': 'Task 1 Updated',
+            'description': 'Description 1 Updated',
+            'status': 'O'
+        }
+        response = self.client.put(url_update, data, self.content_type)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Task.objects.filter(title='Task 1 Updated').exists())
+
+    def test_task_delete(self):
+        task = baker.make(Task)
+        url = f'{self.url_base}{task.id}/'
+        
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Task.objects.filter(id=task.id).exists())
